@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Morning Run - Aplikasi Jadwal Lari Pagi</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/umd/lucide.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 50%, #e0f7fa 100%);
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .container {
+            max-width: 1024px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(to right, #2563eb, #0891b2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: rgba(37, 99, 235, 0.7);
+            font-size: 1.125rem;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .nav-wrapper {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(12px);
+            border-radius: 9999px;
+            padding: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .nav-btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: transparent;
+            color: #2563eb;
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(to right, #3b82f6, #06b6d4);
+            color: white;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+            transform: scale(1.05);
+        }
+
+        .nav-btn:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .tab-content {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(12px);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .timer-container {
+            text-align: center;
+        }
+
+        .timer-circle {
+            position: relative;
+            width: 256px;
+            height: 256px;
+            margin: 0 auto 2rem;
+        }
+
+        .timer-svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .timer-info {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .timer-display {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #1d4ed8;
+            margin-bottom: 0.5rem;
+        }
+
+        .timer-target {
+            color: rgba(37, 99, 235, 0.7);
+            font-size: 0.875rem;
+        }
+
+        .timer-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            border-radius: 9999px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, #3b82f6, #06b6d4);
+            color: white;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+            transform: scale(1.05);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.6);
+            color: #2563eb;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            transform: scale(1.05);
+        }
+
+        .timer-settings {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 1rem;
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .timer-settings label {
+            display: block;
+            color: #1d4ed8;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .timer-input {
+            width: 6rem;
+            padding: 0.5rem 0.75rem;
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 0.5rem;
+            text-align: center;
+            font-weight: 500;
+            color: #1d4ed8;
+            outline: none;
+        }
+
+        .timer-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        .schedule-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .schedule-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1d4ed8;
+        }
+
+        .add-form {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(12px);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            color: #2563eb;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 0.5rem;
+            color: #1d4ed8;
+            outline: none;
+        }
+
+        .form-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .schedule-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .schedule-item {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(12px);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .schedule-item:hover {
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .schedule-item.completed {
+            opacity: 0.75;
+        }
+
+        .schedule-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .schedule-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .schedule-checkbox {
+            width: 1.25rem;
+            height: 1.25rem;
+            accent-color: #3b82f6;
+        }
+
+        .schedule-details h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1d4ed8;
+            margin-bottom: 0.25rem;
+        }
+
+        .schedule-details p {
+            font-size: 0.875rem;
+            color: rgba(37, 99, 235, 0.7);
+        }
+
+        .schedule-details.completed h3 {
+            color: rgba(59, 130, 246, 0.6);
+            text-decoration: line-through;
+        }
+
+        .schedule-details.completed p {
+            color: rgba(59, 130, 246, 0.6);
+        }
+
+        .schedule-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .icon-btn {
+            padding: 0.5rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .icon-btn:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .weather-container {
+            text-align: center;
+        }
+
+        .weather-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1d4ed8;
+            margin-bottom: 1.5rem;
+        }
+
+        .weather-main {
+            margin-bottom: 2rem;
+        }
+
+        .weather-icon {
+            margin-bottom: 1rem;
+        }
+
+        .weather-temp {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #1d4ed8;
+            margin-bottom: 0.5rem;
+        }
+
+        .weather-condition {
+            font-size: 1.25rem;
+            color: rgba(37, 99, 235, 0.7);
+        }
+
+        .weather-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .weather-card {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .weather-card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .weather-card-title {
+            font-weight: 600;
+            color: #1d4ed8;
+        }
+
+        .weather-card-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1d4ed8;
+        }
+
+        .weather-recommendation {
+            padding: 1.5rem;
+            background: linear-gradient(to right, rgba(59, 130, 246, 0.2), rgba(6, 182, 212, 0.2));
+            border-radius: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .weather-recommendation h3 {
+            font-weight: 600;
+            color: #1d4ed8;
+            margin-bottom: 0.75rem;
+        }
+
+        .weather-recommendation p {
+            color: rgba(37, 99, 235, 0.8);
+            line-height: 1.5;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .timer-circle {
+                width: 200px;
+                height: 200px;
+            }
+            
+            .timer-display {
+                font-size: 2rem;
+            }
+            
+            .timer-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .schedule-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>Morning Run</h1>
+            <p>Mulai hari dengan semangat berlari</p>
+        </div>
+
+        <!-- Navigation -->
+        <div class="nav-container">
+            <div class="nav-wrapper">
+                <div class="nav-buttons">
+                    <button class="nav-btn active" onclick="showTab('timer')">Timer</button>
+                    <button class="nav-btn" onclick="showTab('schedule')">Jadwal</button>
+                    <button class="nav-btn" onclick="showTab('weather')">Cuaca</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timer Tab -->
+        <div id="timer-tab" class="tab-content">
+            <div class="timer-container">
+                <div class="timer-circle">
+                    <svg class="timer-svg" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="45" stroke="rgba(59, 130, 246, 0.2)" stroke-width="4" fill="none"/>
+                        <circle id="progress-circle" cx="50" cy="50" r="45" stroke="url(#gradient)" stroke-width="4" fill="none" 
+                                stroke-dasharray="282.74" stroke-dashoffset="282.74" style="transition: stroke-dashoffset 0.3s ease"/>
+                        <defs>
+                            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="#3b82f6"/>
+                                <stop offset="100%" stop-color="#06b6d4"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <div class="timer-info">
+                        <div class="timer-display" id="timer-display">00:00</div>
+                        <div class="timer-target">Target: <span id="target-display">30</span> menit</div>
+                    </div>
+                </div>
+
+                <div class="timer-controls">
+                    <button class="btn btn-primary" id="play-pause-btn" onclick="toggleTimer()">
+                        <i data-lucide="play"></i>
+                        <span>Mulai</span>
+                    </button>
+                    <button class="btn btn-secondary" onclick="resetTimer()">
+                        <i data-lucide="square"></i>
+                        <span>Reset</span>
+                    </button>
+                </div>
+
+                <div class="timer-settings">
+                    <label for="target-input">Target Waktu (menit)</label>
+                    <input type="number" id="target-input" class="timer-input" value="30" min="1" max="120" onchange="updateTarget()">
+                </div>
+            </div>
+        </div>
+
+        <!-- Schedule Tab -->
+        <div id="schedule-tab" class="tab-content hidden">
+            <div class="schedule-header">
+                <h2 class="schedule-title">Jadwal Lari</h2>
+                <button class="btn btn-primary" onclick="toggleAddForm()">
+                    <i data-lucide="plus"></i>
+                    <span>Tambah</span>
+                </button>
+            </div>
+
+            <div id="add-form" class="add-form hidden">
+                <h3 style="color: #1d4ed8; font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem;">Tambah Jadwal Baru</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Hari</label>
+                        <select id="new-day" class="form-input">
+                            <option value="">Pilih Hari</option>
+                            <option value="Senin">Senin</option>
+                            <option value="Selasa">Selasa</option>
+                            <option value="Rabu">Rabu</option>
+                            <option value="Kamis">Kamis</option>
+                            <option value="Jumat">Jumat</option>
+                            <option value="Sabtu">Sabtu</option>
+                            <option value="Minggu">Minggu</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Waktu</label>
+                        <input type="time" id="new-time" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label>Durasi (menit)</label>
+                        <input type="number" id="new-duration" class="form-input" value="30" min="5" max="180">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-primary" onclick="addSchedule()" style="background: linear-gradient(to right, #10b981, #059669);">
+                        Simpan
+                    </button>
+                    <button class="btn btn-secondary" onclick="toggleAddForm()">
+                        Batal
+                    </button>
+                </div>
+            </div>
+
+            <div id="schedule-list" class="schedule-list">
+                <!-- Schedules will be inserted here -->
+            </div>
+        </div>
+
+        <!-- Weather Tab -->
+        <div id="weather-tab" class="tab-content hidden">
+            <div class="weather-container">
+                <h2 class="weather-title">Cuaca Hari Ini</h2>
+                
+                <div class="weather-main">
+                    <div class="weather-icon">
+                        <i data-lucide="sun" style="width: 4rem; height: 4rem; color: #fbbf24;"></i>
+                    </div>
+                    <div class="weather-temp">24°C</div>
+                    <div class="weather-condition">Cerah</div>
+                </div>
+
+                <div class="weather-details">
+                    <div class="weather-card">
+                        <div class="weather-card-header">
+                            <i data-lucide="thermometer" style="width: 1.5rem; height: 1.5rem; color: #3b82f6;"></i>
+                            <span class="weather-card-title">Kelembaban</span>
+                        </div>
+                        <div class="weather-card-value">65%</div>
+                    </div>
+
+                    <div class="weather-card">
+                        <div class="weather-card-header">
+                            <i data-lucide="wind" style="width: 1.5rem; height: 1.5rem; color: #3b82f6;"></i>
+                            <span class="weather-card-title">Kecepatan Angin</span>
+                        </div>
+                        <div class="weather-card-value">8 km/h</div>
+                    </div>
+                </div>
+
+                <div class="weather-recommendation">
+                    <h3>Rekomendasi Lari</h3>
+                    <p>Cuaca sempurna untuk berlari! Suhu ideal dan kondisi mendukung.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let timerInterval;
+        let timerSeconds = 0;
+        let isRunning = false;
+        let targetMinutes = 30;
+        
+        let schedules = [
+            { id: 1, day: 'Senin', time: '06:00', duration: 30, completed: false },
+            { id: 2, day: 'Rabu', time: '06:00', duration: 45, completed: true },
+            { id: 3, day: 'Jumat', time: '06:30', duration: 30, completed: false },
+            { id: 4, day: 'Minggu', time: '07:00', duration: 60, completed: false }
+        ];
+
+        // Initialize Lucide icons
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+            renderSchedules();
+        });
+
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // Remove active class from all nav buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.remove('hidden');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function updateTimerDisplay() {
+            document.getElementById('timer-display').textContent = formatTime(timerSeconds);
+            
+            const progress = Math.min((timerSeconds / (targetMinutes * 60)) * 100, 100);
+            const circumference = 2 * Math.PI * 45;
+            const offset = circumference - (progress / 100) * circumference;
+            document.getElementById('progress-circle').style.strokeDashoffset = offset;
+        }
+
+        function toggleTimer() {
+            if (isRunning) {
+                pauseTimer();
+            } else {
+                startTimer();
+            }
+        }
+
+        function startTimer() {
+            isRunning = true;
+            const btn = document.getElementById('play-pause-btn');
+            btn.innerHTML = '<i data-lucide="pause"></i><span>Pause</span>';
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+            
+            timerInterval = setInterval(() => {
+                timerSeconds++;
+                updateTimerDisplay();
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            isRunning = false;
+            const btn = document.getElementById('play-pause-btn');
+            btn.innerHTML = '<i data-lucide="play"></i><span>Mulai</span>';
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+            
+            clearInterval(timerInterval);
+        }
+
+        function resetTimer() {
+            isRunning = false;
+            timerSeconds = 0;
+            clearInterval(timerInterval);
+            
+            const btn = document.getElementById('play-pause-btn');
+            btn.innerHTML = '<i data-lucide="play"></i><span>Mulai</span>';
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+            
+            updateTimerDisplay();
+        }
+
+        function updateTarget() {
+            targetMinutes = parseInt(document.getElementById('target-input').value);
+            document.getElementById('target-display').textContent = targetMinutes;
+            updateTimerDisplay();
+        }
+
+        function toggleAddForm() {
+            const form = document.getElementById('add-form');
+            form.classList.toggle('hidden');
+        }
+
+        function addSchedule() {
+            const day = document.getElementById('new-day').value;
+            const time = document.getElementById('new-time').value;
+            const duration = parseInt(document.getElementById('new-duration').value);
+            
+            if (day && time) {
+                const newSchedule = {
+                    id: Date.now(),
+                    day: day,
+                    time: time,
+                    duration: duration,
+                    completed: false
+                };
+                
+                schedules.push(newSchedule);
+                renderSchedules();
+                
+                // Reset form
+                document.getElementById('new-day').value = '';
+                document.getElementById('new-time').value = '';
+                document.getElementById('new-duration').value = 30;
+                toggleAddForm();
+            }
+        }
+
+        function toggleScheduleComplete(id) {
+            schedules = schedules.map(schedule => 
+                schedule.id === id ? { ...schedule, completed: !schedule.completed } : schedule
+            );
+            renderSchedules();
+        }
+
+        function deleteSchedule(id) {
+            schedules = schedules.filter(schedule => schedule.id !== id);
+            renderSchedules();
+        }
+
+        function renderSchedules() {
+            const scheduleList = document.getElementById('schedule-list');
+            scheduleList.innerHTML = '';
+            
+            schedules.forEach(schedule => {
+                const scheduleItem = document.createElement('div');
+                scheduleItem.className = `schedule-item ${schedule.completed ? 'completed' : ''}`;
+                
+                scheduleItem.innerHTML = `
+                    <div class="schedule-content">
+                        <div class="schedule-info">
+                            <input type="checkbox" class="schedule-checkbox" ${schedule.completed ? 'checked' : ''} 
+                                   onchange="toggleScheduleComplete(${schedule.id})">
+                            <div class="schedule-details ${schedule.completed ? 'completed' : ''}">
+                                <h3>${schedule.day}</h3>
+                                <p>${schedule.time} • ${schedule.duration} menit</p>
+                            </div>
+                        </div>
+                        <div class="schedule-actions">
+                            <button class="icon-btn" onclick="deleteSchedule(${schedule.id})" 
+                                    style="color: #ef4444;">
+                                <i data-lucide="trash-2" style="width: 1rem; height: 1rem;"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                scheduleList.appendChild(scheduleItem);
+            });
+            
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        // Initialize timer display
+        updateTimerDisplay();
+    </script>
+</body>
+</html>
